@@ -1,0 +1,138 @@
+/* Import Preview Dialog Styles */
+.dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.dialog[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+.dialog-content {
+    padding: 20px;
+}
+
+.dialog h3 {
+    margin-top: 0;
+    color: var(--secondary-color);
+    font-size: 20px;
+    text-align: center;
+}
+
+.import-preview {
+    margin: 20px 0;
+}
+
+.task-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 15px 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 10px;
+}
+
+.task-item {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+.task-name {
+    font-weight: 500;
+}
+
+.task-dates {
+    color: #666;
+    font-size: 14px;
+}
+
+.import-options {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.import-options label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    transition: var(--transition);
+}
+
+.import-options label:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.import-options input {
+    margin: 0;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    max-width: 300px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    background-color: var(--success-color);
+}
+
+.toast.error {
+    background-color: var(--danger-color);
+}
+
+.toast.warning {
+    background-color: var(--warning-color);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .dialog {
+        width: 95%;
+    }
+    
+    .toast {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}

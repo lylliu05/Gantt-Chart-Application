@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas甘特图</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="import-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Canvas甘特图</h1>
+        <div class="controls">
+        <div class="action-buttons">
+            <button id="addTask" title="添加新任务"><i class="fas fa-plus-circle"></i>添加</button>
+            <button id="importBtn" title="导入JSON格式的任务数据"><i class="fas fa-file-import"></i>导入</button>
+            <input type="file" id="importFile" accept=".json" style="display:none">
+            <button id="exportBtn" title="导出当前任务数据为JSON文件"><i class="fas fa-file-export"></i>导出</button>                
+            <button id="batchDeleteBtn" class="danger-btn" title="批量删除选中的任务"><i class="fas fa-trash-alt"></i>批量</button>
+        </div>
+            <div class="view-controls">
+                <button id="prevWeek" aria-label="上一周" title="上一周"><i class="fas fa-chevron-left"></i></button>
+                <button id="todayBtn" aria-label="跳转到今天" title="跳转到今天"><i class="fas fa-calendar-day"></i> 今天</button>
+                <span id="currentDateRange">2023年11月20日-26日</span>
+                <button id="nextWeek" aria-label="下一周" title="下一周"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="view-toggle">
+                <button id="weekView" class="active" title="切换到周视图"><i class="fas fa-calendar-week"></i>周视图</button>
+                <button id="monthView" title="切换到月视图"><i class="fas fa-calendar-alt"></i>月视图</button>
+            </div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="ganttCanvas"></canvas>
+        </div>
+    </div>
+
+    <div id="taskDialog" class="task-dialog" aria-hidden="true">
+        <form id="taskForm">
+            <h3>添加新任务</h3>
+            <div class="dialog-content">
+                <label for="taskName">任务名称</label>
+                <input type="text" id="taskName" required aria-describedby="taskNameHelp">
+                <span id="taskNameHelp" class="visually-hidden">请输入任务名称</span>
+            </div>
+            <div class="dialog-content">
+                <label for="taskStartDate">开始日期</label>
+                <input type="date" id="taskStartDate" required aria-describedby="startDateHelp">
+                <span id="startDateHelp" class="visually-hidden">请选择开始日期</span>
+            </div>
+            <div class="dialog-content">
+                <label for="taskEndDate">结束日期</label>
+                <input type="date" id="taskEndDate" required aria-describedby="endDateHelp">
+                <span id="endDateHelp" class="visually-hidden">请选择结束日期</span>
+            </div>
+            <div class="dialog-buttons">
+                <button type="button" id="cancelDialog" class="dialog-btn cancel-btn" title="取消当前操作"><i class="fas fa-times"></i> 取消</button>
+                <button type="submit" class="dialog-btn submit-btn" title="提交任务信息"><i class="fas fa-check"></i> 添加</button>
+            </div>
+        </form>
+    </div>
+    <div id="overlay" class="overlay" aria-hidden="true"></div>
+    <script src="import-helper.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
