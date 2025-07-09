@@ -1,330 +1,352 @@
-/* ======================
-   变量定义
-   ====================== */
-   :root {
-    /* 颜色变量 */
-    --primary-color: #3498db;
-    --primary-hover: #2980b9;
-    --secondary-color: #2c3e50;
-    --success-color: #2ecc71;
-    --warning-color: #e67e22;
-    --danger-color: #e74c3c;
-    --text-color: #34495e;
-    --bg-color: #f8f9fa;
-    --border-color: #e0e0e0;
-    --shadow-color: rgba(0, 0, 0, 0.08);
-    
-    /* 尺寸变量 */
-    --radius: 8px;
-    --transition: all 0.2s ease;
+/* style.css 更新内容 */
+:root {
+    /* 现代化配色方案 */
+    --primary: #FF5733; /* 修改主要颜色为橙色 */
+    --primary-light: #FF8C66;
+    --primary-dark: #CC4426;
+    --secondary: #3a0ca3;
+    --accent: #4cc9f0;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --bg: #f8fafc;
+    --bg-light: #ffffff;
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --glass: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.2);
 }
 
-/* ======================
-   基础样式
-   ====================== */
 body {
-    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     margin: 0;
-    padding: 20px;
-    background-color: var(--bg-color);
+    padding: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 布局容器 */
+.pane-container {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
     min-height: 100vh;
-    color: var(--text-color);
-}
-
-h1 {
-    color: var(--secondary-color);
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 28px;
-    font-weight: 600;
-}
-
-/* ======================
-   布局样式
-   ====================== */
-.container {
-    max-width: 1200px;
-    background-color: white;
-    padding: 25px;
-    border-radius: var(--radius);
-    box-shadow: 0 4px 12px var(--shadow-color);
+    padding: 32px;
+    box-sizing: border-box;
+    gap: 32px;
+    max-width: 1800px;
+    margin: 0 auto;
     width: 95%;
-    margin: 20px auto;
 }
 
-.canvas-container {
-    width: 100%;
-    min-width: 1200px;
-    overflow-x: auto;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    margin-top: 15px;
-    background-color: white;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* ======================
-   组件样式 - 按钮
-   ====================== */
-button {
-    padding: 10px 18px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 14px;
-    transition: var(--transition);
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-button i {
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-button:active {
-    transform: translateY(0);
-}
-
-button.active {
-    background-color: var(--secondary-color);
-}
-
-/* 按钮变体 */
-.danger-btn {
-    background-color: var(--danger-color);
-}
-
-.danger-btn:hover {
-    background-color: #c0392b;
-}
-
-#todayBtn {
-    background-color: var(--warning-color);
-}
-
-#todayBtn:hover {
-    background-color: #d35400;
-}
-
-#todayBtn.active {
-    background-color: #a04000;
-    box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.5);
-}
-
-.submit-btn {
-    background-color: var(--success-color);
-}
-
-.submit-btn:hover {
-    background-color: #27ae60;
-}
-
-.cancel-btn {
-    background-color: #e0e0e0;
-    color: var(--text-color);
-}
-
-.cancel-btn:hover {
-    background-color: #d0d0d0;
-}
-
-/* ======================
-   组件样式 - 控制面板
-   ====================== */
-.controls {
-    margin-bottom: 25px;
+/* 标题区域 */
+.header-pane {
     display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
     justify-content: space-between;
     align-items: center;
+    padding: 0 16px;
+}
+
+.header-pane h1 {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+/* 控制面板 */
+.controls-pane {
+    padding: 20px;
+    background: var(--glass);
+    border-radius: var(--radius);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
 }
 
 .action-buttons {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.view-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#currentDateRange {
-    font-weight: 600;
-    min-width: 220px;
-    text-align: center;
-}
-
-.view-toggle {
-    display: flex;
-    gap: 10px;
-}
-
-/* 批量控制 */
-#batchControls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-top: 10px;
-    padding: 10px 15px;
-    background-color: #f8f9fa;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-color);
-}
-
-#batchControls label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--text-color);
+/* 按钮样式 */
+.btn {
+    padding: 12px 20px; /* 修改内边距 */
+    border-radius: 10px; /* 修改圆角大小 */
+    border: none;
     cursor: pointer;
-}
-
-#batchControls label i {
-    font-size: 16px;
-    color: var(--secondary-color);
-}
-
-#selectedCount {
-    display: flex;
+    font-size: 16px; /* 修改字体大小 */
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
-    color: var(--text-color);
+    background-color: var(--bg-light);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
 }
 
-#selectedCount i {
-    color: var(--primary-color);
-}
-
-#selectedCount .count {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-/* ======================
-   组件样式 - 对话框
-   ====================== */
-.task-dialog {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 25px;
-    border-radius: var(--radius);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-    z-index: 1001;
-    width: 320px;
-    display: none;
-}
-
-.task-dialog h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: var(--secondary-color);
-    text-align: center;
-}
-
-.task-dialog[aria-hidden="false"] {
-    display: block;
-}
-
-.dialog-content {
-    margin-bottom: 18px;
-}
-
-.dialog-content label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: var(--text-color);
-}
-
-.dialog-content input {
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 14px;
+    height: 100%;
+    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+    opacity: 0;
     transition: var(--transition);
 }
 
-.dialog-content input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover::after {
+    opacity: 1;
+}
+
+.btn.primary {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary-dark);
+}
+
+.btn.primary:hover {
+    background-color: var(--primary-light);
+}
+
+.btn i {
+    font-size: 14px;
+}
+
+/* 甘特图区域 */
+.gantt-pane {
+    flex: 1;
+}
+
+.canvas-container {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-light);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+#ganttCanvas {
+    display: block;
+}
+
+/* 对话框样式 */
+.dialog, .task-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: var(--glass);
+    border-radius: var(--radius);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+.dialog[aria-hidden="false"], 
+.task-dialog[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.dialog-content {
+    padding: 24px;
+}
+
+.dialog h3 {
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    color: var(--secondary);
+    font-weight: 600;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
 }
 
 .dialog-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 25px;
+    margin-top: 24px;
 }
 
-/* ======================
-   组件样式 - 遮罩层
-   ====================== */
+/* 表单元素 */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: var(--transition);
+    background-color: var(--bg-light);
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+/* 覆盖层 */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
     display: none;
+    opacity: 0;
+    transition: var(--transition);
 }
 
 .overlay[aria-hidden="false"] {
     display: block;
+    opacity: 1;
 }
 
-/* ======================
-   响应式设计
-   ====================== */
-@media (min-width: 1600px) {
-    .container {
-        max-width: 1500px;
-    }
+/* 删除按钮 */
+.btn.danger {
+    background-color: var(--danger);
+    color: rgb(209, 35, 35);
+    border-color: var(--danger);
 }
 
+.btn.danger:hover {
+    background-color: #ef4444;
+}
+
+/* 响应式设计 */
 @media (max-width: 1200px) {
-    .container {
-        width: 100%;
-        padding: 15px;
+    .pane-container {
+        padding: 24px;
+        gap: 24px;
     }
     
-    .canvas-container {
-        min-width: 800px;
+    .header-pane h1 {
+        font-size: 28px;
     }
 }
 
 @media (max-width: 768px) {
-    .controls {
+    .pane-container {
+        padding: 16px;
+        gap: 16px;
+        width: 100%;
+    }
+    
+    .header-pane {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
+        gap: 12px;
     }
     
-    .view-controls {
-        justify-content: center;
+    .header-pane h1 {
+        font-size: 24px;
     }
     
-    .view-toggle {
-        justify-content: center;
+    .controls-pane {
+        padding: 16px;
     }
+    
+    .action-buttons {
+        gap: 6px;
+    }
+    
+    .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .dialog, .task-dialog {
+        width: 98%;
+    }
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    transition: var(--transition);
+    max-width: 320px;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.success {
+    background-color: rgba(74, 222, 128, 0.9);
+}
+
+.toast.error {
+    background-color: rgba(248, 113, 113, 0.9);
+}
+
+.toast i {
+    font-size: 18px;
+}
+
+/* 加载动画 */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
 }

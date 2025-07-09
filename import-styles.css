@@ -1,42 +1,13 @@
-/* Import Preview Dialog Styles */
-.dialog {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+/* 导入预览对话框样式 */
+.import-preview {
+    margin: 15px 0;
+    padding: 15px;
     background-color: white;
     border-radius: var(--radius);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-.dialog[aria-hidden="false"] {
-    opacity: 1;
-    visibility: visible;
-}
-
-.dialog-content {
-    padding: 20px;
-}
-
-.dialog h3 {
-    margin-top: 0;
-    color: var(--secondary-color);
-    font-size: 20px;
-    text-align: center;
-}
-
-.import-preview {
-    margin: 20px 0;
-}
-
+/* 任务列表容器 */
 .task-list {
     max-height: 300px;
     overflow-y: auto;
@@ -44,21 +15,31 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     padding: 10px;
+    background-color: white;
 }
 
+/* 任务项样式 */
 .task-item {
     padding: 10px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
 }
 
 .task-item:last-child {
     border-bottom: none;
 }
 
+.task-item:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* 任务信息样式 */
 .task-name {
     font-weight: 500;
+    color: var(--text-color);
 }
 
 .task-dates {
@@ -66,6 +47,7 @@
     font-size: 14px;
 }
 
+/* 导入选项样式 */
 .import-options {
     margin: 20px 0;
     display: flex;
@@ -78,7 +60,7 @@
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    padding: 8px 12px;
+    padding: 10px;
     border-radius: var(--radius);
     transition: var(--transition);
 }
@@ -87,11 +69,7 @@
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-.import-options input {
-    margin: 0;
-}
-
-/* Toast Notifications */
+/* 提示信息样式 */
 .toast {
     position: fixed;
     bottom: 20px;
@@ -103,7 +81,7 @@
     z-index: 1000;
     opacity: 0;
     transform: translateY(20px);
-    transition: all 0.3s ease;
+    transition: var(--transition);
     max-width: 300px;
 }
 
@@ -120,19 +98,15 @@
     background-color: var(--danger-color);
 }
 
-.toast.warning {
-    background-color: var(--warning-color);
-}
-
-/* Responsive Styles */
+/* 响应式设计 */
 @media (max-width: 768px) {
-    .dialog {
-        width: 95%;
-    }
-    
     .toast {
         left: 20px;
         right: 20px;
         max-width: none;
+    }
+    
+    .task-list {
+        max-height: 200px;
     }
 }

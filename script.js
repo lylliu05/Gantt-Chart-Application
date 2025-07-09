@@ -3,10 +3,11 @@ class GanttChart {
         this.canvas = document.getElementById('ganttCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.tasks = [];
+        this.selectedTask = null;
         this.currentDate = new Date();
         this.viewMode = 'week';
-        this.colWidth = 100;
-        this.rowHeight = 45;
+        this.colWidth = 200;
+        this.rowHeight = 55;
         this.padding = 25;
         this.taskColors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'];
         
@@ -147,22 +148,21 @@ class GanttChart {
     }
 
     resizeCanvas() {
+        const container = this.canvas.parentElement;
         const { startDate, endDate } = this.getCurrentViewDateRange();
         const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
         
-        const containerWidth = this.canvas.parentElement.clientWidth;
-        const requiredWidth = this.padding * 2 + totalDays * this.colWidth;
+        // 根据可用空间调整列宽
+        const availableWidth = container.clientWidth - this.padding * 2;
+        this.colWidth = Math.max(80, availableWidth / totalDays);
         
-        this.canvas.width = Math.max(requiredWidth, containerWidth);
+        // 设置Canvas尺寸
+        this.canvas.width = this.padding * 2 + totalDays * this.colWidth;
         
+        // 计算高度
         const visibleTasks = this.getVisibleTasks();
         const canvasHeight = this.padding * 2 + visibleTasks.length * this.rowHeight;
         this.canvas.height = Math.max(canvasHeight, 300);
-        
-        if (requiredWidth > containerWidth) {
-            this.colWidth = Math.max(80, (containerWidth - this.padding * 2) / totalDays);
-            this.canvas.width = this.padding * 2 + totalDays * this.colWidth;
-        }
     }
 
     getCurrentViewDateRange() {
@@ -311,6 +311,13 @@ class GanttChart {
         const x = this.padding + Math.max(0, taskStartDay) * this.colWidth;
         const y = this.padding + index * this.rowHeight;
         const width = (Math.min(taskEndDay, totalDays - 1) - Math.max(0, taskStartDay) + 1) * this.colWidth;
+        
+        // 绘制选中状态
+        if (task.selected) {
+            this.ctx.strokeStyle = '#3498db';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(x - 2, y - 2, width + 4, this.rowHeight + 4);
+        }
         
         const colorIndex = index % this.taskColors.length;
         const color = this.taskColors[colorIndex];
@@ -527,6 +534,30 @@ class GanttChart {
 
     }
 
+    handleDeleteTask() {
+        if (!this.selectedTask) {
+            this.showToast('请先选择要删除的任务', 'error');
+            return;
+        }
+
+        console.log('准备删除任务:', this.selectedTask);
+        console.log('当前任务数量:', this.tasks.length);
+
+        const index = this.tasks.findIndex(t => t.id === this.selectedTask.id);
+        if (index !== -1) {
+            this.tasks.splice(index, 1);
+            // 完全重置所有相关状态
+            this.tasks.forEach(t => t.selected = false);
+            this.selectedTask = null;
+            this.deleteTaskBtn.disabled = true;
+            this.saveTasks();
+            this.render();
+            this.showToast('任务已删除', 'success');
+            
+            console.log('任务已删除，剩余任务数量:', this.tasks.length);
+        }
+    }
+
     setupEventListeners() {
         this.addTaskBtn.addEventListener('click', () => {
             this.taskDialog.setAttribute('aria-hidden', 'false');
@@ -641,6 +672,7 @@ class GanttChart {
     handleCanvasClick(x, y) {
         const { startDate } = this.getCurrentViewDateRange();
         const visibleTasks = this.getVisibleTasks();
+        const event = window.event; // 获取事件对象
         
         for (let i = 0; i < visibleTasks.length; i++) {
             const task = visibleTasks[i];
@@ -653,9 +685,35 @@ class GanttChart {
             
             if (x >= taskX && x <= taskX + taskWidth && 
                 y >= taskY && y <= taskY + this.rowHeight) {
-                this.editTask(task);
+                
+                // 检查是否按下了Ctrl或Command键
+                const isMultiSelect = event.ctrlKey || event.metaKey;
+                
+                if (isMultiSelect) {
+                    // 多选模式 - 切换选中状态
+                    task.selected = !task.selected;
+                } else {
+                    // 单选模式 - 清除所有选中状态，然后选中当前任务
+                    this.tasks.forEach(t => t.selected = false);
+                    task.selected = true;
+                    
+                    // 如果没有按下Shift键，同时编辑任务
+                    if (!event.shiftKey) {
+                        this.editTask(task);
+                        return;
+                    }
+                }
+                
+                // 重新渲染以显示选中状态
+                this.render();
                 return;
             }
+        }
+        
+        // 点击空白处 - 清除所有选中状态
+        if (!event.ctrlKey && !event.metaKey) {
+            this.tasks.forEach(t => t.selected = false);
+            this.render();
         }
     }
 
@@ -669,7 +727,91 @@ class GanttChart {
         this.taskNameInput.focus();
         
         // 临时保存原始任务ID
-        const originalTaskId = task.id;
+        let originalTaskId = task.id;
+
+        // 创建删除按钮
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn delete-btn';
+        deleteBtn.textContent = '删除任务';
+        
+        // 确保表单操作区域存在
+        let formActions = this.taskForm.querySelector('.form-actions');
+        if (!formActions) {
+            formActions = document.createElement('div');
+            formActions.className = 'form-actions';
+            this.taskForm.appendChild(formActions);
+        }
+
+        // 确保表单操作区域和提交按钮都存在
+        if (!formActions || !this.taskForm.contains(formActions)) {
+            console.error('表单操作区域不存在或已从DOM中移除');
+            return;
+        }
+
+        // 获取提交按钮作为参考节点
+        const submitBtn = this.taskForm.querySelector('button[type="submit"]');
+        
+        try {
+            // 插入删除按钮
+            if (submitBtn && formActions.contains(submitBtn)) {
+                formActions.insertBefore(deleteBtn, submitBtn);
+            } else if (formActions) {
+                formActions.appendChild(deleteBtn);
+            } else {
+                console.error('无法插入删除按钮：表单操作区域无效');
+            }
+        } catch (error) {
+            console.error('插入删除按钮失败:', error);
+            this.showToast('操作失败，请重试', 'error');
+        }
+        
+            // 绑定删除事件
+            deleteBtn.addEventListener('click', () => {
+                const index = this.tasks.findIndex(t => t.id === originalTaskId);
+                if (index !== -1) {
+                    this.tasks.splice(index, 1);
+                    this.saveTasks();
+                    this.render();
+                    this.showToast('任务已删除', 'success');
+                }
+                
+                // 完全重置表单状态
+                this.taskForm.reset();
+                this.taskNameInput.value = '';
+                this.taskStartDateInput.value = new Date().toISOString().split('T')[0];
+                this.taskEndDateInput.value = new Date().toISOString().split('T')[0];
+                
+                // 关闭对话框
+                this.taskDialog.setAttribute('aria-hidden', 'true');
+                this.overlay.style.display = 'none';
+                
+                // 移除删除按钮
+                if (deleteBtn && deleteBtn.parentNode) {
+                    deleteBtn.parentNode.removeChild(deleteBtn);
+                }
+                
+                // 清理临时保存的任务ID
+                originalTaskId = null;
+            });
+
+            // 确保在表单提交或取消时也移除删除按钮
+            const originalSubmitHandler = this.taskForm._submitHandler;
+            const originalCancelHandler = this.cancelDialogBtn.onclick;
+            
+            this.taskForm._submitHandler = (event) => {
+                if (deleteBtn && deleteBtn.parentNode) {
+                    deleteBtn.parentNode.removeChild(deleteBtn);
+                }
+                originalSubmitHandler && originalSubmitHandler(event);
+            };
+            
+            this.cancelDialogBtn.onclick = (event) => {
+                if (deleteBtn && deleteBtn.parentNode) {
+                    deleteBtn.parentNode.removeChild(deleteBtn);
+                }
+                originalCancelHandler && originalCancelHandler(event);
+            };
         
         // 修改表单提交处理逻辑
         const submitHandler = (event) => {
@@ -737,6 +879,8 @@ class GanttChart {
             }, 300);
         }, 3000);
     }
+
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {

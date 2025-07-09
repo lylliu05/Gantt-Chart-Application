@@ -168,21 +168,44 @@ class ImportHelper {
     validateAndProcessTasks(tasks) {
         console.log('开始验证和处理任务数据...');
         const newTasks = [];
-        const seenIds = new Set();  // 用于检测重复ID
+        const seenIds = new Set();
+        const now = new Date();
+        const maxDateRange = 365 * 10; // 10年
+        
+        // 验证任务数组
+        if (!Array.isArray(tasks)) {
+            throw new Error('任务数据必须是数组');
+        }
         
         for (const [index, task] of tasks.entries()) {
             try {
                 console.log(`验证任务 ${index + 1}/${tasks.length}:`, task);
                 
-                // 验证任务字段
-                if (!task.name || typeof task.name !== 'string') {
+                // 验证任务对象
+                if (!task || typeof task !== 'object') {
+                    console.warn(`跳过任务 ${index + 1}: 无效的任务对象`);
+                    continue;
+                }
+                
+                // 验证任务名称
+                if (!task.name || typeof task.name !== 'string' || task.name.trim().length === 0) {
                     console.warn(`跳过任务 ${index + 1}: 名称格式不正确`);
+                    continue;
+                }
+                if (task.name.length > 100) {
+                    console.warn(`跳过任务 ${index + 1}: 名称过长`);
                     continue;
                 }
 
                 // 验证日期
+                if (!task.startDate || !task.endDate) {
+                    console.warn(`跳过任务 ${index + 1}: 缺少日期字段`);
+                    continue;
+                }
+                
                 const startDate = new Date(task.startDate);
                 const endDate = new Date(task.endDate);
+                
                 if (isNaN(startDate.getTime())) {
                     console.warn(`跳过任务 ${index + 1}: 无效的开始日期`);
                     continue;
@@ -195,9 +218,20 @@ class ImportHelper {
                     console.warn(`跳过任务 ${index + 1}: 开始日期晚于结束日期`);
                     continue;
                 }
+                
+                // 验证日期范围合理性
+                const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+                if (daysDiff > maxDateRange) {
+                    console.warn(`跳过任务 ${index + 1}: 任务持续时间过长`);
+                    continue;
+                }
+                if (startDate > now && daysDiff > 365) {
+                    console.warn(`跳过任务 ${index + 1}: 未来任务持续时间过长`);
+                    continue;
+                }
 
                 // 处理任务ID - 确保唯一性
-                let taskId = task.id && typeof task.id === 'string' ? task.id : 
+                let taskId = task.id && typeof task.id === 'string' ? task.id :
                             `imported-${Date.now()}-${index}`;
                 
                 if (seenIds.has(taskId)) {
