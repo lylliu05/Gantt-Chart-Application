@@ -1,6 +1,6 @@
 # 甘特图应用 (Gantt Chart Application)
 
-![Gantt Chart Preview](preview.png)
+![alt text](image.png)
 
 一个基于Web的甘特图应用，帮助用户可视化和管理项目任务时间线。
 
@@ -38,9 +38,9 @@
 ### 快速开始
 1. 克隆仓库:
    ```bash
-   git clone https://github.com/yourusername/gantt-chart.git
+   git clone https://github.com/lylliu05/Gantt-Chart-Application.git
    ```
-2. 打开index.html文件即可使用
+2. 访问 https://resplendent-malabi-381327.netlify.app/
 
 ## 使用说明
 
