@@ -616,7 +616,6 @@ class GanttChart {
             // 完全重置所有相关状态
             this.tasks.forEach(t => t.selected = false);
             this.selectedTask = null;
-            this.deleteTaskBtn.disabled = true;
             this.saveTasks();
             this.render();
             this.showToast('任务已删除', 'success');

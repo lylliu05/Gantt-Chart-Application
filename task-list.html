@@ -185,6 +185,9 @@
                                             <button class="cancel-btn" title="取消编辑">
                                                 <i class="fas fa-times"></i>
                                             </button>
+                                            <button class="delete-btn" title="删除任务">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </td>
                                     `;
 
@@ -206,6 +209,13 @@
                                             // 重新渲染行
                                             renderTaskRow(row, currentTask, tasks, gantt);
                                         });
+                                    });
+
+                                    // 删除按钮事件
+                                    row.querySelector('.delete-btn').addEventListener('click', () => {
+                                        gantt.selectedTask = currentTask;
+                                        gantt.handleDeleteTask();
+                                        row.remove();
                                     });
 
                                     // 取消按钮事件
