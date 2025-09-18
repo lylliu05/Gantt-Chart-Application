@@ -1,4 +1,4 @@
-# 甘特图应用 v0.1.2 (Gantt Chart Application)
+# 甘特图应用(Gantt Chart Application)
 
 ![alt text](image.png)
 

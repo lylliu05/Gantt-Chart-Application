@@ -1,7 +1,5 @@
 class GanttChart {
     constructor() {
-        this.canvas = document.getElementById('ganttCanvas');
-        this.ctx = this.canvas.getContext('2d');
         this.tasks = [];
         this.selectedTask = null;
         this.currentDate = new Date();
@@ -10,17 +8,49 @@ class GanttChart {
         this.rowHeight = 55;
         this.padding = 25;
         this.taskColors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'];
+        this.version = '版本号错误'; // 默认版本号
         
-        this.initElements();
-        this.setupEventListeners();
-        this.loadTasks();
-        this.resizeCanvas();
-        this.render();
-        
-        window.addEventListener('resize', this.debounce(() => {
+        // 只在canvas存在时初始化相关功能
+        this.loadConfig().then(() => {
+            this.updateVersionDisplay();
+        });
+
+        this.canvas = document.getElementById('ganttCanvas');
+        if (this.canvas) {
+            this.ctx = this.canvas.getContext('2d');
+            this.taskStyles = new TaskStyles(this.ctx, this.rowHeight);
+            
+            this.initElements();
+            this.setupEventListeners();
             this.resizeCanvas();
             this.render();
-        }, 200));
+            
+            window.addEventListener('resize', this.debounce(() => {
+                this.resizeCanvas();
+                this.render();
+            }, 200));
+        }
+        
+        // 总是加载任务数据
+        this.loadTasks();
+    }
+
+    async loadConfig() {
+        try {
+            const response = await fetch('config.json');
+            if (!response.ok) throw new Error('配置文件加载失败');
+            const config = await response.json();
+            if (config.version) this.version = config.version;
+        } catch (error) {
+            console.error('加载配置文件失败:', error);
+        }
+    }
+
+    updateVersionDisplay() {
+        const titleElement = document.querySelector('.header-pane h1');
+        if (titleElement) {
+            titleElement.textContent = `甘特图v${this.version}`;
+        }
     }
 
     async importData(jsonData) {
@@ -148,7 +178,11 @@ class GanttChart {
     }
 
     resizeCanvas() {
+        if (!this.canvas) return;
+        
         const container = this.canvas.parentElement;
+        if (!container) return;
+        
         const { startDate, endDate } = this.getCurrentViewDateRange();
         const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
         
@@ -232,9 +266,11 @@ class GanttChart {
                     
                     console.log('处理后的任务数据:', this.tasks);
                     
-                    // 强制重新渲染
-                    this.resizeCanvas();
-                    this.render(true); // 强制完全重绘
+                    // 只在canvas存在时执行重绘
+                    if (this.canvas) {
+                        this.resizeCanvas();
+                        this.render(true); // 强制完全重绘
+                    }
                     resolve();
                 };
                 
@@ -252,6 +288,8 @@ class GanttChart {
     }
 
     render(fullRedraw = true) {
+        if (!this.canvas || !this.ctx) return;
+        
         try {
             console.log('开始渲染甘特图，任务数量:', this.tasks.length);
             
@@ -312,19 +350,38 @@ class GanttChart {
         const y = this.padding + index * this.rowHeight;
         const width = (Math.min(taskEndDay, totalDays - 1) - Math.max(0, taskStartDay) + 1) * this.colWidth;
         
+        const colorIndex = index % this.taskColors.length;
+        const color = this.taskColors[colorIndex];
+        
+        // 使用TaskStyles绘制任务
+        this.taskStyles.drawStyledBackground(x, y, width, color);
+        this.taskStyles.drawStyledProgress(x, y, width, color, task.progress || 0);
+        
+        // 绘制任务文本
+        this.drawTaskText(x, y, width, task.name, task.progress || 0);
+        
         // 绘制选中状态
         if (task.selected) {
             this.ctx.strokeStyle = '#3498db';
             this.ctx.lineWidth = 3;
-            this.ctx.strokeRect(x - 2, y - 2, width + 4, this.rowHeight + 4);
+            
+            // 创建圆角矩形路径
+            const height = this.rowHeight - 5;
+            const radius = 6;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(x - 2 + radius, y - 2);
+            this.ctx.lineTo(x + width + 2 - radius, y - 2);
+            this.ctx.quadraticCurveTo(x + width + 2, y - 2, x + width + 2, y - 2 + radius);
+            this.ctx.lineTo(x + width + 2, y + height + 2 - radius);
+            this.ctx.quadraticCurveTo(x + width + 2, y + height + 2, x + width + 2 - radius, y + height + 2);
+            this.ctx.lineTo(x - 2 + radius, y + height + 2);
+            this.ctx.quadraticCurveTo(x - 2, y + height + 2, x - 2, y + height + 2 - radius);
+            this.ctx.lineTo(x - 2, y - 2 + radius);
+            this.ctx.quadraticCurveTo(x - 2, y - 2, x - 2 + radius, y - 2);
+            this.ctx.closePath();
+            this.ctx.stroke();
         }
-        
-        const colorIndex = index % this.taskColors.length;
-        const color = this.taskColors[colorIndex];
-        
-        this.drawTaskBackground(x, y, width, color);
-        this.drawTaskProgress(x, y, width, color, task.progress || 0);
-        this.drawTaskText(x, y, width, task.name, task.progress || 0);
     }
 
     drawTaskBackground(x, y, width, color) {
@@ -472,6 +529,16 @@ class GanttChart {
             console.log('数据库未初始化，正在初始化...');
             await this.initDB();
         }
+
+        // 更新本地存储
+        const tasksForStorage = this.tasks.map(task => ({
+            id: task.id,
+            name: task.name,
+            startDate: task.startDate.getTime(),
+            endDate: task.endDate.getTime(),
+            progress: task.progress
+        }));
+        localStorage.setItem('ganttTasks', JSON.stringify(tasksForStorage));
         
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['tasks'], 'readwrite');
@@ -569,16 +636,20 @@ class GanttChart {
             this.viewMode = 'week';
             this.weekViewBtn.classList.add('active');
             this.monthViewBtn.classList.remove('active');
-            this.resizeCanvas();
-            this.render();
+            if (this.canvas) {
+                this.resizeCanvas();
+                this.render();
+            }
         });
         
         this.monthViewBtn.addEventListener('click', () => {
             this.viewMode = 'month';
             this.monthViewBtn.classList.add('active');
             this.weekViewBtn.classList.remove('active');
-            this.resizeCanvas();
-            this.render();
+            if (this.canvas) {
+                this.resizeCanvas();
+                this.render();
+            }
         });
         
         this.prevWeekBtn.addEventListener('click', () => {
@@ -589,8 +660,10 @@ class GanttChart {
             }
             
             this.updateDateRangeDisplay();
-            this.resizeCanvas();
-            this.render();
+            if (this.canvas) {
+                this.resizeCanvas();
+                this.render();
+            }
         });
         
         this.nextWeekBtn.addEventListener('click', () => {
@@ -601,8 +674,10 @@ class GanttChart {
             }
             
             this.updateDateRangeDisplay();
-            this.resizeCanvas();
-            this.render();
+            if (this.canvas) {
+                this.resizeCanvas();
+                this.render();
+            }
         });
         
         this.todayBtn.addEventListener('click', this.jumpToToday.bind(this));
@@ -660,13 +735,15 @@ class GanttChart {
             this.taskForm.reset();
         });
         
-        this.canvas.addEventListener('click', (event) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            
-            this.handleCanvasClick(x, y);
-        });
+        if (this.canvas) {
+            this.canvas.addEventListener('click', (event) => {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                this.handleCanvasClick(x, y);
+            });
+        }
     }
 
     handleCanvasClick(x, y) {
@@ -884,21 +961,53 @@ class GanttChart {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const gantt = new GanttChart();
+    // 检测当前页面是否是task-list.html
+    const isTaskListPage = document.querySelector('.task-list-container') !== null;
     
-    // 监听对话框属性变化
-    const dialog = document.getElementById('taskDialog');
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => {
-            if (mutation.attributeName === 'aria-hidden') {
-                if (dialog.getAttribute('aria-hidden') === 'true') {
-                    dialog.style.display = 'none';
-                } else {
-                    dialog.style.display = 'block';
-                }
+    if (!isTaskListPage) {
+        try {
+            // 确保所有必需元素都存在
+            const canvas = document.getElementById('ganttCanvas');
+            const dialog = document.getElementById('taskDialog');
+            
+            if (!canvas) {
+                throw new Error('找不到甘特图画布元素');
             }
-        });
-    });
-    
-    observer.observe(dialog, { attributes: true });
+            if (!dialog) {
+                throw new Error('找不到任务对话框元素');
+            }
+            
+            // 初始化甘特图
+            const gantt = new GanttChart();
+            
+            // 监听对话框属性变化
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach(mutation => {
+                    if (mutation.attributeName === 'aria-hidden') {
+                        if (dialog.getAttribute('aria-hidden') === 'true') {
+                            dialog.style.display = 'none';
+                        } else {
+                            dialog.style.display = 'block';
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(dialog, { attributes: true });
+            
+        } catch (error) {
+            console.error('初始化失败:', error);
+            // 显示错误信息给用户
+            const errorContainer = document.createElement('div');
+            errorContainer.style.color = 'red';
+            errorContainer.style.padding = '20px';
+            errorContainer.style.textAlign = 'center';
+            errorContainer.innerHTML = `
+                <h3>应用初始化失败</h3>
+                <p>${error.message}</p>
+                <p>请刷新页面或检查控制台获取更多信息</p>
+            `;
+            document.body.appendChild(errorContainer);
+        }
+    }
 });

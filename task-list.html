@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务列表</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .task-list-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .task-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .task-list-title {
+            font-size: 24px;
+            color: #3a0ca3;
+        }
+        
+        .back-to-gantt {
+            padding: 8px 16px;
+            background-color: #3a0ca3;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-table th, .task-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .task-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+        
+        .task-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .task-name {
+            font-weight: 500;
+        }
+        
+        .task-dates {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .task-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #3a0ca3;
+        }
+    </style>
+</head>
+<body>
+    <div class="task-list-container">
+        <div class="task-list-header">
+            <h1 class="task-list-title">任务列表</h1>
+            <a href="index.html" class="back-to-gantt">
+                <i class="fas fa-arrow-left"></i> 返回甘特图
+            </a>
+        </div>
+        
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>任务名称</th>
+                    <th>开始日期</th>
+                    <th>结束日期</th>
+                    <th>进度</th>
+                </tr>
+            </thead>
+            <tbody id="taskListBody">
+                <!-- 任务列表将通过JavaScript动态生成 -->
+            </tbody>
+        </table>
+    </div>
+    
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // 创建GanttChart实例（不会初始化canvas相关功能）
+                const gantt = new GanttChart();
+                
+                // 加载任务数据
+                gantt.loadTasks().then(() => {
+                    const tasks = gantt.tasks;
+                    const taskListBody = document.getElementById('taskListBody');
+                    
+                    if (!taskListBody) {
+                        throw new Error('找不到任务列表容器');
+                    }
+                    
+                    // 清空现有内容
+                    taskListBody.innerHTML = '';
+                    
+                    // 渲染任务列表
+                    tasks.forEach(task => {
+                        const row = document.createElement('tr');
+                        
+                        // 使用模板字符串提高性能
+                        row.innerHTML = `
+                            <td class="task-name">${task.name}</td>
+                            <td class="task-dates">${task.startDate.toLocaleDateString('zh-CN')}</td>
+                            <td class="task-dates">${task.endDate.toLocaleDateString('zh-CN')}</td>
+                            <td class="task-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${task.progress || 0}%"></div>
+                                </div>
+                                ${task.progress || 0}%
+                            </td>
+                        `;
+                        
+                        taskListBody.appendChild(row);
+                    });
+                }).catch(error => {
+                    throw error;
+                });
+            } catch (error) {
+                console.error('任务列表初始化失败:', error);
+                const errorMsg = document.createElement('div');
+                errorMsg.style.color = 'red';
+                errorMsg.style.padding = '20px';
+                errorMsg.style.textAlign = 'center';
+                errorMsg.innerHTML = `
+                    <h3>任务列表加载失败</h3>
+                    <p>${error.message}</p>
+                    <p>请刷新页面或检查控制台获取更多信息</p>
+                `;
+                document.body.appendChild(errorMsg);
+            }
+        });
+    </script>
+</body>
+</html>
