@@ -11,9 +11,44 @@
 |--------|------|
 | index.html | 应用入口页面，加载所有资源文件 |
 | script.js | 主逻辑文件，包含甘特图核心功能 |
-| style.css | 主样式文件，定义应用整体样式 |
+| style.css | 主样式文件，定义应用整体样式和设计系统 |
 | import-helper.js | 导入功能模块，处理数据导入逻辑 |
 | import-styles.css | 导入相关样式文件 |
+| task-styles.js | 任务列表相关样式逻辑 |
+
+### 样式架构
+- **style.css**: 包含全局样式和设计系统定义
+  - 定义CSS变量(颜色、间距、圆角等)
+  - 提供基础组件样式(按钮、表格、表单等)
+  - 遵循统一的设计规范
+- **import-styles.css**: 仅包含导入功能相关样式
+- **task-styles.js**: 处理任务列表的动态样式逻辑
+
+## 样式指南
+
+### CSS变量使用
+所有样式应使用预定义的CSS变量，确保设计一致性:
+```css
+/* 使用示例 */
+.element {
+  color: var(--secondary);
+  background-color: var(--bg-light);
+  border-radius: var(--radius);
+}
+```
+
+### 设计规范
+1. **颜色**: 使用预定义的颜色变量(--primary, --secondary等)
+2. **间距**: 统一使用8px为基准单位
+3. **圆角**: 使用--radius(12px)或--radius-sm(8px)
+4. **过渡效果**: 使用--transition变量统一动画效果
+5. **阴影**: 使用--shadow变量统一阴影效果
+
+### 最佳实践
+- 避免内联样式，使用CSS类
+- 组件样式应独立且可复用
+- 响应式设计优先考虑移动端
+- 使用BEM命名规范或类似方法保持样式可维护性
 
 ### 依赖关系
 - `index.html` 依赖 `script.js` 和 `style.css`

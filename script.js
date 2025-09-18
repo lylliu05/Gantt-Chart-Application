@@ -627,6 +627,7 @@ class GanttChart {
     setupEventListeners() {
         this.addTaskBtn.addEventListener('click', () => {
             this.taskDialog.setAttribute('aria-hidden', 'false');
+            this.overlay.setAttribute('aria-hidden', 'false');
             this.overlay.style.display = 'block';
             this.taskNameInput.focus();
         });
@@ -728,8 +729,14 @@ class GanttChart {
             this.taskEndDateInput.value = today;
         });
         
-        this.cancelDialogBtn.addEventListener('click', () => {
-            this.taskDialog.setAttribute('aria-hidden', 'true');
+            this.cancelDialogBtn.addEventListener('click', () => {
+                this.taskDialog.setAttribute('aria-hidden', 'true');
+                this.overlay.setAttribute('aria-hidden', 'true');
+            });
+
+            this.overlay.addEventListener('click', () => {
+                this.taskDialog.setAttribute('aria-hidden', 'true');
+                this.overlay.setAttribute('aria-hidden', 'true');
             this.overlay.style.display = 'none';
             this.taskForm.reset();
         });

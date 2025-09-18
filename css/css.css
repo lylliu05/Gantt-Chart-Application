@@ -1,3 +1,5 @@
+/* ================================= 全局基础样式 ================================= */
+/* 初始化：清除默认边距和内边距，统一盒模型 */
 * {
     margin: 0;
     padding: 0;
@@ -12,12 +14,15 @@
     padding: 0 10px;
   }
   
+  /* ================================= 1. 导航菜单适配 ================================= */
+  /* 导航容器 */
   .nav-container {
     width: 100%;
     background-color: #2c3e50;
     margin-bottom: 20px;
   }
   
+  /* 桌面端导航：横向排列 */
   .nav-list {
     list-style: none;
     display: flex;
@@ -43,6 +48,7 @@
     background-color: #34495e;
   }
   
+  /* 移动端导航：隐藏默认横向，显示汉堡按钮（需配合JS控制显示/隐藏） */
   .hamburger {
     display: none;
     color: #fff;
@@ -52,7 +58,10 @@
     text-align: right;
   }
   
+  /* ================================= 2. 文字样式适配 ================================= */
+  /* 标题文字：按屏幕尺寸动态调整大小 */
   h1 {
+    font-size: 2.5rem; /* 桌面端默认 */
     text-align: center;
     margin: 20px 0;
     color: #2c3e50;
@@ -72,6 +81,8 @@
     margin-right: auto;
   }
   
+  /* ================================= 3. 图片/视频适配 ================================= */
+  /* 图片容器：控制图片显示范围，避免溢出 */
   .img-container, .video-container {
     max-width: 1200px;
     margin: 20px auto;
@@ -81,6 +92,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   
+  /* 弹性图片：确保在任何容器中自适应，不拉伸 */
   img {
     max-width: 100%;
     height: auto;
@@ -89,6 +101,7 @@
     margin: 0 auto;
   }
   
+  /* 弹性视频：适配不同屏幕，保持16:9比例（避免变形） */
   video {
     max-width: 100%;
     height: auto;
@@ -97,9 +110,12 @@
     margin: 0 auto;
   }
   
+  /* ================================= 4. 表格适配 ================================= */
+  /* 表格容器：添加横向滚动，避免移动端表格溢出 */
   .table-container {
     max-width: 1200px;
     margin: 20px auto;
+    overflow-x: auto; /* 关键：移动端横向滚动 */
     background-color: #fff;
     padding: 10px;
     border-radius: 8px;
@@ -127,6 +143,8 @@
     background-color: #f8f9fa;
   }
   
+  /* ================================= 5. 对话框适配 ================================= */
+  /* 对话框容器：居中显示，随屏幕缩放 */
   .dialog-container {
     position: fixed;
     top: 0;
@@ -137,12 +155,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1000; /* 确保在最上层 */
   }
   
+  /* 对话框内容：控制最大宽度，移动端占满屏幕 */
   .dialog-content {
     background-color: #fff;
     border-radius: 8px;
     max-width: 500px;
+    width: 90%; /* 移动端占90%宽度 */
     padding: 24px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
@@ -175,26 +196,26 @@
   
   .dialog-body {
     margin-bottom: 20px;
+    font-size: 1rem;
   }
   
   .dialog-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    text-align: right;
   }
   
   .dialog-btn {
     padding: 8px 16px;
-    border-radius: 4px;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s;
+    margin-left: 8px;
+    font-size: 0.9rem;
   }
   
   .btn-confirm {
     background-color: #2c3e50;
-    color: white;
+    color: #fff;
+    transition: background-color 0.3s;
   }
   
   .btn-confirm:hover {
@@ -202,126 +223,80 @@
   }
   
   .btn-cancel {
-    background-color: #f5f5f5;
+    background-color: #eee;
     color: #333;
+    transition: background-color 0.3s;
   }
   
   .btn-cancel:hover {
-    background-color: #e0e0e0;
+    background-color: #ddd;
   }
   
+  /* ================================= 三端媒体查询适配 ================================= */
+  /* 1. 平板端（768px - 1023px）：调整中等屏幕样式 */
   @media (max-width: 1023px) and (min-width: 768px) {
-    .nav-list {
-      max-width: 100%;
-      padding: 0 20px;
-    }
-    
     .nav-link {
-      padding: 12px 18px;
+      padding: 14px 18px;
+      font-size: 15px;
     }
     
-    .img-container, .video-container, .table-container {
-      margin: 15px auto;
+    h1 {
+      font-size: 2.2rem;
     }
     
-    .dialog-content {
-      max-width: 80%;
+    h2 {
+      font-size: 1.8rem;
+    }
+    
+    p {
+      font-size: 0.95rem;
     }
   }
   
-.task-dialog {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 1000;
-    width: 90%;
-    max-width: 500px;
-    display: none;
-}
-
-.task-dialog[aria-hidden="false"] {
-    display: block;
-}
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 999;
-    display: none;
-}
-
-.overlay[aria-hidden="false"] {
-    display: block;
-}
-
-@media (max-width: 767px) {
-    .nav-container {
-      position: relative;
-    }
-    
+  /* 2. 手机端（≤767px）：核心适配调整 */
+  @media (max-width: 767px) {
+    /* 导航：隐藏横向列表，显示汉堡按钮 */
     .nav-list {
-      display: none;
+      display: none; /* 默认隐藏，需JS控制显示（展开为纵向） */
       flex-direction: column;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 100%;
-      background-color: #2c3e50;
-      z-index: 100;
-    }
-    
-    .nav-list.active {
-      display: flex;
-    }
-    
-    .nav-item {
-      width: 100%;
-    }
-    
-    .nav-link {
-      padding: 12px 20px;
-      border-top: 1px solid rgba(255,255,255,0.1);
     }
     
     .hamburger {
       display: block;
     }
     
+    .nav-link {
+      padding: 12px 20px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    /* 文字：缩小尺寸，适配小屏幕 */
     h1 {
       font-size: 1.8rem;
-      margin: 15px 0;
     }
     
     h2 {
       font-size: 1.5rem;
-      margin: 15px 0;
     }
     
-    .img-container, .video-container, .table-container {
-      margin: 10px auto;
-      padding: 8px;
+    p {
+      font-size: 0.9rem;
+      padding: 0 5px;
     }
     
+    /* 对话框：调整内边距，优化小屏体验 */
     .dialog-content {
-      max-width: 90%;
-      padding: 16px;
+      padding: 20px 16px;
     }
     
     .dialog-title {
       font-size: 1.1rem;
     }
     
-    .dialog-btn {
-      padding: 6px 12px;
-      font-size: 0.9rem;
+    /* 表格：缩小单元格内边距 */
+    th, td {
+      padding: 10px 12px;
+      font-size: 0.85rem;
     }
   }
