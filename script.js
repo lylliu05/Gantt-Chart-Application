@@ -721,7 +721,7 @@ class GanttChart {
             this.addTask(name, startDate, endDate);
             
             this.taskDialog.setAttribute('aria-hidden', 'true');
-            this.overlay.style.display = 'none';
+            this.overlay.setAttribute('aria-hidden', 'true');
             this.taskForm.reset();
             
             const today = new Date().toISOString().split('T')[0];
@@ -806,7 +806,7 @@ class GanttChart {
         this.taskEndDateInput.value = task.endDate.toISOString().split('T')[0];
         
         this.taskDialog.setAttribute('aria-hidden', 'false');
-        this.overlay.style.display = 'block';
+        this.overlay.setAttribute('aria-hidden', 'false');
         this.taskNameInput.focus();
         
         // 临时保存原始任务ID
@@ -867,7 +867,7 @@ class GanttChart {
                 
                 // 关闭对话框
                 this.taskDialog.setAttribute('aria-hidden', 'true');
-                this.overlay.style.display = 'none';
+                this.overlay.setAttribute('aria-hidden', 'true');
                 
                 // 移除删除按钮
                 if (deleteBtn && deleteBtn.parentNode) {
