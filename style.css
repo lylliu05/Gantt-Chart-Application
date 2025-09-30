@@ -445,6 +445,25 @@
     z-index: 10;
     box-shadow: 0 3px 10px rgba(0,0,0,0.15);
   }
+
+  .header-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .header-links .view-task-list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+
+  .header-links .view-task-list:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
   
   .header-pane h1 {
     margin: 0;
@@ -710,5 +729,4 @@
 .task-table th,
 .task-table td {
   white-space: nowrap;
-}
 }

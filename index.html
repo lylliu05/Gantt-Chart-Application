@@ -14,9 +14,14 @@
     <div class="pane-container" role="application" aria-label="甘特图应用">
         <header class="header-pane">
             <h1>甘特图</h1>
-            <a href="task-list.html" class="view-task-list" title="查看任务列表" aria-label="查看任务列表">
-                <i class="fas fa-list" aria-hidden="true"></i> 任务列表
-            </a>
+            <div class="header-links">
+                <a href="task-list.html" class="view-task-list" title="查看任务列表" aria-label="查看任务列表">
+                    <i class="fas fa-list" aria-hidden="true"></i> 任务列表
+                </a>
+                <a href="recommended-tasks.html" class="view-task-list" title="查看推荐任务" aria-label="查看推荐任务">
+                    <i class="fas fa-lightbulb" aria-hidden="true"></i> 推荐任务
+                </a>
+            </div>
         </header>
         
         <nav class="controls-pane" aria-label="甘特图控制面板">
@@ -102,6 +107,7 @@
     <div id="overlay" class="overlay" aria-hidden="true" tabindex="-1"></div>
     
 
+    <script src="db.js"></script>
     <script src="task-styles.js"></script>
     <script src="import-helper.js"></script>
     <script src="render-layer.js"></script>

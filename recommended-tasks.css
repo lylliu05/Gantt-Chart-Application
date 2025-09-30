@@ -1,0 +1,189 @@
+/* 推荐任务页面样式 */
+.recommended-tasks-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* 导航链接样式 */
+.navigation-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-link {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 筛选条件样式 */
+.recommendation-filters {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+    margin-bottom: 1rem;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+/* 推荐任务列表样式 */
+.recommendations-list {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.task-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-card h3 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.task-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.task-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.task-priority {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.priority-high {
+    background-color: #ffd7d7;
+    color: #dc3545;
+}
+
+.priority-medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.priority-low {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* 任务统计样式 */
+.task-statistics {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.stat-card h3 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+/* Toast 通知样式 */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #333;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    display: none;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

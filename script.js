@@ -346,56 +346,49 @@ class GanttChart {
 
     async loadTasks() {
         try {
-            if (!this.db) {
-                await this.initDB();
+            // 如果已经有任务数据且不是强制刷新，直接返回
+            if (this.tasks && this.tasks.length > 0 && !this._forceRefresh) {
+                return Promise.resolve();
             }
+
+            const rawTasks = await DBUtils.getAllTasks();
             
-            return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction(['tasks'], 'readonly');
-                const store = transaction.objectStore('tasks');
-                const request = store.getAll();
+            // 验证并处理加载的数据
+            this.tasks = rawTasks.map(task => {
+                // 确保所有必要字段都存在
+                if (!task.id || !task.name || !task.startDate || !task.endDate) {
+                    console.warn('发现无效任务数据:', task);
+                    return null;
+                }
                 
-                request.onsuccess = (event) => {
-                    console.log('从数据库加载的任务数据:', event.target.result);
-                    
-                    // 验证并处理加载的数据
-                    this.tasks = event.target.result.map(task => {
-                        // 确保所有必要字段都存在
-                        if (!task.id || !task.name || !task.startDate || !task.endDate) {
-                            console.warn('发现无效任务数据:', task);
-                            return null;
-                        }
-                        
-                        return {
-                            id: task.id,
-                            name: task.name,
-                            startDate: new Date(task.startDate),
-                            endDate: new Date(task.endDate),
-                            progress: task.progress || 0
-                        };
-                    }).filter(task => task !== null); // 过滤掉无效数据
-                    
-                    console.log('处理后的任务数据:', this.tasks);
-                    
-                    // 只在canvas存在时执行重绘
-                    if (this.canvas) {
-                        this.resizeCanvas();
-                        this.render(true); // 强制完全重绘
-                    }
-                    resolve();
+                return {
+                    id: task.id,
+                    name: task.name,
+                    startDate: new Date(task.startDate),
+                    endDate: new Date(task.endDate),
+                    progress: task.progress || 0
                 };
-                
-                request.onerror = (event) => {
-                    console.error('加载任务失败:', event.target.error);
-                    this.showToast('加载任务失败', 'error');
-                    reject(event.target.error);
-                };
-            });
+            }).filter(task => task !== null); // 过滤掉无效数据
+            
+            // 只在canvas存在时执行重绘
+            if (this.canvas) {
+                this.resizeCanvas();
+                this.render(true); // 强制完全重绘
+            }
+
+            // 重置强制刷新标志
+            this._forceRefresh = false;
         } catch (error) {
             console.error('加载任务时发生错误:', error);
             this.showToast('加载任务时发生错误', 'error');
             throw error;
         }
+    }
+
+    // 强制刷新任务列表
+    forceRefreshTasks() {
+        this._forceRefresh = true;
+        return this.loadTasks();
     }
 
     render(fullRedraw = true) {
@@ -675,7 +668,7 @@ class GanttChart {
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
-    addTask(name, startDate, endDate) {
+    async addTask(name, startDate, endDate) {
         console.log('开始添加任务:', {name, startDate, endDate});
         
         try {
@@ -706,20 +699,26 @@ class GanttChart {
             
             console.log('创建的任务对象:', task);
             
-            this.tasks.push(task);
-            console.log('当前任务列表:', this.tasks);
+            // 使用 DBUtils 添加任务
+            await DBUtils.addTask(task);
             
-            // 保存并重新渲染
-            this.saveTasks().then(() => {
-                console.log('任务保存成功');
+            // 重新加载所有任务
+            const tasks = await DBUtils.getAllTasks();
+            this.tasks = tasks.map(task => ({
+                ...task,
+                startDate: new Date(task.startDate),
+                endDate: new Date(task.endDate)
+            }));
+            
+            console.log('任务添加成功，当前任务列表:', this.tasks);
+            
+            // 重新渲染
+            if (this.canvas) {
                 this.resizeCanvas();
                 this.render(true); // 强制完全重绘
-                this.showToast(`任务"${name}"添加成功`, 'success');
-            }).catch(error => {
-                console.error('保存任务失败:', error);
-                this.showToast('保存任务失败', 'error');
-            });
+            }
             
+            this.showToast(`任务"${name}"添加成功`, 'success');
         } catch (error) {
             console.error('添加任务时出错:', error);
             this.showToast(`添加任务失败: ${error.message}`, 'error');
@@ -762,83 +761,42 @@ class GanttChart {
         console.log('当前任务数量:', this.tasks.length);
         console.log('任务ID列表:', this.tasks.map(task => task.id));
         
-        if (!this.db) {
-            console.log('数据库未初始化，正在初始化...');
-            await this.initDB();
+        try {
+            // 使用 DBUtils 更新所有任务
+            for (const task of this.tasks) {
+                const taskData = {
+                    id: task.id,
+                    name: task.name,
+                    startDate: task.startDate.getTime(),
+                    endDate: task.endDate.getTime(),
+                    progress: task.progress
+                };
+                
+                await DBUtils.updateTask(taskData);
+            }
+            
+            console.log('所有任务已成功保存到数据库');
+            
+            // 重新加载所有任务以确保数据同步
+            const tasks = await DBUtils.getAllTasks();
+            this.tasks = tasks.map(task => ({
+                ...task,
+                startDate: new Date(task.startDate),
+                endDate: new Date(task.endDate)
+            }));
+            
+            // 更新本地存储
+            localStorage.setItem('ganttTasks', JSON.stringify(this.tasks));
+            
+            console.log('任务保存和同步完成');
+        } catch (error) {
+            console.error('保存任务时发生错误:', error);
+            this.showToast('保存任务失败', 'error');
+            throw error;
         }
-
-        // 更新本地存储
-        const tasksForStorage = this.tasks.map(task => ({
-            id: task.id,
-            name: task.name,
-            startDate: task.startDate.getTime(),
-            endDate: task.endDate.getTime(),
-            progress: task.progress
-        }));
-        localStorage.setItem('ganttTasks', JSON.stringify(tasksForStorage));
-        
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['tasks'], 'readwrite');
-            const store = transaction.objectStore('tasks');
-            
-            console.log('开始清除现有数据...');
-            const clearRequest = store.clear();
-            
-            clearRequest.onsuccess = () => {
-                console.log('数据清除成功，开始保存新数据...');
-                
-                // 批量保存所有任务
-                const savePromises = this.tasks.map(task => {
-                    return new Promise((resolve, reject) => {
-                        const taskData = {
-                            id: task.id,
-                            name: task.name,
-                            startDate: task.startDate.getTime(),
-                            endDate: task.endDate.getTime(),
-                            progress: task.progress
-                        };
-                        
-                        const request = store.put(taskData);
-                        
-                        request.onsuccess = () => {
-                            console.log('任务保存成功:', task.id);
-                            resolve();
-                        };
-                        request.onerror = (event) => {
-                            console.error('保存任务失败:', event.target.error);
-                            reject(event.target.error);
-                        };
-                    });
-                });
-                
-                Promise.all(savePromises)
-                    .then(() => {
-                        console.log('所有任务已成功保存到数据库');
-                        resolve();
-                    })
-                    .catch(error => {
-                        console.error('保存任务时发生错误:', error);
-                        reject(error);
-                    });
-            };
-            
-            clearRequest.onerror = (event) => {
-                console.error('清除数据失败:', event.target.error);
-                reject(event.target.error);
-            };
-            
-            transaction.oncomplete = () => {
-                console.log('事务完成: 所有任务已成功保存');
-            };
-            
-            transaction.onerror = (event) => {
-                console.error('事务失败:', event.target.error);
-            };
-        });
-
     }
 
-    handleDeleteTask() {
+    async handleDeleteTask() {
         if (!this.selectedTask) {
             this.showToast('请先选择要删除的任务', 'error');
             return;
@@ -847,17 +805,36 @@ class GanttChart {
         console.log('准备删除任务:', this.selectedTask);
         console.log('当前任务数量:', this.tasks.length);
 
-        const index = this.tasks.findIndex(t => t.id === this.selectedTask.id);
-        if (index !== -1) {
-            this.tasks.splice(index, 1);
+        try {
+            // 使用 DBUtils 删除任务
+            await DBUtils.deleteTask(this.selectedTask.id);
+            
+            // 重新加载所有任务
+            const tasks = await DBUtils.getAllTasks();
+            this.tasks = tasks.map(task => ({
+                ...task,
+                startDate: new Date(task.startDate),
+                endDate: new Date(task.endDate)
+            }));
+            
             // 完全重置所有相关状态
             this.tasks.forEach(t => t.selected = false);
             this.selectedTask = null;
-            this.saveTasks();
+            
+            // 重新渲染
+            if (this.canvas) {
+                this.resizeCanvas();
+                this.render(true);
+            }
+            
+            this.showToast('任务删除成功', 'success');
             this.render();
             this.showToast('任务已删除', 'success');
             
             console.log('任务已删除，剩余任务数量:', this.tasks.length);
+        } catch (error) {
+            console.error('删除任务时发生错误:', error);
+            this.showToast('删除任务失败', 'error');
         }
     }
 
@@ -1204,7 +1181,7 @@ class GanttChart {
             };
         
         // 修改表单提交处理逻辑
-        const submitHandler = (event) => {
+        const submitHandler = async (event) => {
             event.preventDefault();
             
             const name = this.taskNameInput.value.trim();
@@ -1216,30 +1193,49 @@ class GanttChart {
                 return;
             }
             
-            // 更新任务
-            const taskIndex = this.tasks.findIndex(t => t.id === originalTaskId);
-            if (taskIndex !== -1) {
-                this.tasks[taskIndex] = {
-                    id: originalTaskId,
-                    name,
-                    startDate: new Date(startDate),
-                    endDate: new Date(endDate),
-                    duration: Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1,
-                    progress: this.tasks[taskIndex].progress
-                };
+            try {
+                // 更新任务
+                const taskIndex = this.tasks.findIndex(t => t.id === originalTaskId);
+                if (taskIndex !== -1) {
+                    const updatedTask = {
+                        id: originalTaskId,
+                        name,
+                        startDate: new Date(startDate).getTime(),
+                        endDate: new Date(endDate).getTime(),
+                        progress: this.tasks[taskIndex].progress
+                    };
+                    
+                    // 使用 DBUtils 更新任务
+                    await DBUtils.updateTask(updatedTask);
+                    
+                    // 重新加载所有任务
+                    const tasks = await DBUtils.getAllTasks();
+                    this.tasks = tasks.map(task => ({
+                        ...task,
+                        startDate: new Date(task.startDate),
+                        endDate: new Date(task.endDate)
+                    }));
+                    
+                    // 重新渲染
+                    if (this.canvas) {
+                        this.resizeCanvas();
+                        this.render(true);
+                    }
+                    
+                    this.showToast('任务更新成功', 'success');
+                }
                 
-                this.saveTasks();
-                this.resizeCanvas();
-                this.render();
+                this.taskDialog.setAttribute('aria-hidden', 'true');
+                this.overlay.style.display = 'none';
+                this.taskForm.reset();
+                
+                // 恢复原始事件监听器
+                this.taskForm.removeEventListener('submit', submitHandler);
+                this.taskForm.addEventListener('submit', this.taskForm._originalSubmitHandler);
+            } catch (error) {
+                console.error('更新任务时发生错误:', error);
+                this.showToast('更新任务失败', 'error');
             }
-            
-            this.taskDialog.setAttribute('aria-hidden', 'true');
-            this.overlay.style.display = 'none';
-            this.taskForm.reset();
-            
-            // 恢复原始事件监听器
-            this.taskForm.removeEventListener('submit', submitHandler);
-            this.taskForm.addEventListener('submit', this.taskForm._originalSubmitHandler);
         };
         
         // 保存原始事件监听器

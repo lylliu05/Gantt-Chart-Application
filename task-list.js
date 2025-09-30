@@ -215,30 +215,12 @@ async function saveTask(button, taskId) {
 
     try {
         // 更新数据库
-        const db = await openDB();
-        await db.put('tasks', updatedTask);
+        await DBUtils.updateTask(updatedTask);
 
-        // 更新显示
-        cells[0].innerHTML = `<span class="task-name">${updatedTask.name}</span>`;
-        cells[1].innerHTML = `<span class="task-dates">${formatDate(updatedTask.startDate)}</span>`;
-        cells[2].innerHTML = `<span class="task-dates">${formatDate(updatedTask.endDate)}</span>`;
-        cells[3].innerHTML = `
-            <div class="progress-container" title="${updatedTask.progress}% 完成">
-                <div class="progress-bar" style="width: ${updatedTask.progress}%"></div>
-                <span class="progress-text">${updatedTask.progress}%</span>
-            </div>
-        `;
-        cells[4].innerHTML = `
-            <button class="edit-btn" onclick="editTask(this)" data-task-id="${taskId}" title="编辑任务">
-                <i class="fas fa-edit"></i>
-            </button>
-            <button class="delete-btn" onclick="deleteTask(${taskId})" title="删除任务">
-                <i class="fas fa-trash"></i>
-            </button>
-        `;
-
-        // 移除编辑状态类
-        row.classList.remove('editing');
+        // 重新加载任务列表
+        const tasks = await DBUtils.getAllTasks();
+        renderTaskList(tasks);
+        
         showToast('任务更新成功！', 'success');
     } catch (error) {
         console.error('保存任务失败:', error);
@@ -281,11 +263,10 @@ async function deleteTask(taskId) {
     }
 
     try {
-        const db = await openDB();
-        await db.delete('tasks', taskId);
+        await DBUtils.deleteTask(taskId);
 
         // 重新加载任务列表
-        const tasks = await db.getAll('tasks');
+        const tasks = await DBUtils.getAllTasks();
         renderTaskList(tasks);
         
         showToast('任务删除成功！', 'success');
