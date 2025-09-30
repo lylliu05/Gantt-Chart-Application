@@ -632,11 +632,15 @@
       flex-wrap: wrap;
       gap: 5px;
       justify-content: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
     }
     
     .action-btn {
       padding: 6px 10px;
       font-size: 0.8rem;
+      min-height: 40px; /* 提升触控可点击区域 */
     }
     
     .btn-icon {
@@ -689,3 +693,22 @@
       font-size: 0.9rem;
     }
   }
+
+/* 任务列表页移动端优化 */
+.task-list-container {
+  padding: 10px;
+}
+.task-table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+.task-table thead,
+.task-table tbody,
+.task-table tr,
+.task-table th,
+.task-table td {
+  white-space: nowrap;
+}
+}

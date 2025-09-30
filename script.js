@@ -10,6 +10,7 @@ class GanttChart {
         this.version = '版本号错误'; // 默认版本号
         this.debug = false; // 调试模式开关
         this._renderPending = false; // 渲染状态标记
+        this.layerManager = null; // 渲染层管理器
         
         // 响应式设置
         this.updateResponsiveSettings();
@@ -37,11 +38,13 @@ class GanttChart {
             // 初始化Canvas
             this.canvas = document.getElementById('ganttCanvas');
             if (this.canvas) {
-                this.ctx = this.canvas.getContext('2d', { alpha: false }); // 禁用alpha通道提高性能
+                this.ctx = this.canvas.getContext('2d', { alpha: true }); // 启用alpha通道支持分层
+                this.layerManager = new LayerManager(this.canvas);
                 this.taskStyles = new TaskStyles(this.ctx, this.rowHeight);
                 
                 this.initElements();
                 this.setupEventListeners();
+                this.updateDateRangeDisplay(); // 立即更新日期显示
                 this.resizeCanvas();
                 this.render();
                 
@@ -272,7 +275,7 @@ class GanttChart {
     }
 
     resizeCanvas() {
-        if (!this.canvas) return;
+        if (!this.canvas || !this.layerManager) return;
         
         const container = this.canvas.parentElement;
         if (!container) return;
@@ -284,46 +287,60 @@ class GanttChart {
         const availableWidth = container.clientWidth - this.padding * 2;
         this.colWidth = Math.max(80, availableWidth / totalDays);
         
-        // 设置Canvas尺寸
-        this.canvas.width = this.padding * 2 + totalDays * this.colWidth;
-        
-        // 计算高度
+        // 计算画布尺寸
+        const width = this.padding * 2 + totalDays * this.colWidth;
         const visibleTasks = this.getVisibleTasks();
-        const canvasHeight = this.padding * 2 + visibleTasks.length * this.rowHeight;
-        this.canvas.height = Math.max(canvasHeight, 300);
+        const height = Math.max(this.padding * 2 + visibleTasks.length * this.rowHeight, 300);
+        
+        // 设置主画布和所有渲染层的尺寸
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.layerManager.resizeAll(width, height);
+        this.layerManager.markAllDirty(); // 标记所有层需要重绘
     }
 
     getCurrentViewDateRange() {
-        let startDate, endDate;
         if (this.viewMode === 'week') {
-            startDate = new Date(this.currentDate);
-            startDate.setDate(startDate.getDate() - (startDate.getDay() || 7) + 1);
-            endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + 6);
+            return DateUtils.getWeekRange(this.currentDate);
         } else {
-            startDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
-            endDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
+            return DateUtils.getMonthRange(this.currentDate);
         }
-        return { startDate, endDate };
     }
 
     getVisibleTasks() {
+        const { startDate, endDate } = this.getCurrentViewDateRange();
         return this.tasks.filter(task => {
-            return task.startDate <= this.getCurrentViewDateRange().endDate && 
-                   task.endDate >= this.getCurrentViewDateRange().startDate;
+            try {
+                const taskStart = DateUtils.parseDate(task.startDate);
+                const taskEnd = DateUtils.parseDate(task.endDate);
+                return taskStart <= endDate && taskEnd >= startDate;
+            } catch (error) {
+                console.warn('任务日期解析错误:', error);
+                return false;
+            }
         });
     }
 
     updateDateRangeDisplay() {
         const { startDate, endDate } = this.getCurrentViewDateRange();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const format = this.viewMode === 'week' ? 'full' : 'month';
         
-        if (this.viewMode === 'week') {
-            this.currentDateRangeEl.textContent = 
-                `${startDate.toLocaleDateString('zh-CN', options)} - ${endDate.toLocaleDateString('zh-CN', options)}`;
-        } else {
-            this.currentDateRangeEl.textContent = 
-                `${startDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}`;
+        try {
+            // 确保日期对象有效
+            if (!(startDate instanceof Date) || isNaN(startDate.getTime()) ||
+                !(endDate instanceof Date) || isNaN(endDate.getTime())) {
+                throw new Error('无效的日期对象');
+            }
+
+            // 更新日期范围显示
+            this.currentDateRangeEl.textContent = DateUtils.formatDateRange(startDate, endDate, format);
+
+            // 更新视图按钮状态
+            this.weekViewBtn.classList.toggle('active', this.viewMode === 'week');
+            this.monthViewBtn.classList.toggle('active', this.viewMode === 'month');
+        } catch (error) {
+            console.error('日期范围格式化错误:', error);
+            this.showToast('日期显示格式化失败', 'error');
         }
     }
 
@@ -382,7 +399,7 @@ class GanttChart {
     }
 
     render(fullRedraw = true) {
-        if (!this.canvas || !this.ctx) return;
+        if (!this.canvas || !this.ctx || !this.layerManager) return;
         
         try {
             // 使用requestAnimationFrame优化渲染
@@ -393,11 +410,17 @@ class GanttChart {
                 this._renderPending = false;
                 
                 if (fullRedraw) {
-                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    // 获取各个渲染层
+                    const backgroundLayer = this.layerManager.getLayer('background');
+                    const tasksLayer = this.layerManager.getLayer('tasks');
+                    const progressLayer = this.layerManager.getLayer('progress');
+                    const textLayer = this.layerManager.getLayer('text');
                     
-                    // 绘制主体背景色
-                    this.ctx.fillStyle = '#f0f8ff';
-                    this.ctx.fillRect(0, this.padding, this.canvas.width, this.canvas.height - this.padding);
+                    // 清除并绘制背景层
+                    backgroundLayer.clear();
+                    const bgCtx = backgroundLayer.ctx;
+                    bgCtx.fillStyle = '#f0f8ff';
+                    bgCtx.fillRect(0, this.padding, this.canvas.width, this.canvas.height - this.padding);
                     
                     const { startDate, endDate } = this.getCurrentViewDateRange();
                     const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
@@ -855,22 +878,36 @@ class GanttChart {
                         this.taskNameInput.focus();
                     } else if (id === 'weekView') {
                         this.viewMode = 'week';
+                        // 如果当前在月视图，切换到周视图时需要调整日期
+                        if (this.monthViewBtn.classList.contains('active')) {
+                            const weekRange = DateUtils.getWeekRange(this.currentDate);
+                            this.currentDate = new Date(weekRange.startDate);
+                        }
                         this.weekViewBtn.classList.add('active');
                         this.monthViewBtn.classList.remove('active');
                         // 更新ARIA属性
                         this.weekViewBtn.setAttribute('aria-checked', 'true');
                         this.monthViewBtn.setAttribute('aria-checked', 'false');
+                        // 更新日期范围显示
+                        this.updateDateRangeDisplay();
                         if (this.canvas) {
                             this.resizeCanvas();
                             this.render();
                         }
                     } else if (id === 'monthView') {
                         this.viewMode = 'month';
+                        // 如果当前在周视图，切换到月视图时需要调整日期
+                        if (this.weekViewBtn.classList.contains('active')) {
+                            const monthRange = DateUtils.getMonthRange(this.currentDate);
+                            this.currentDate = new Date(monthRange.startDate);
+                        }
                         this.monthViewBtn.classList.add('active');
                         this.weekViewBtn.classList.remove('active');
                         // 更新ARIA属性
                         this.monthViewBtn.setAttribute('aria-checked', 'true');
                         this.weekViewBtn.setAttribute('aria-checked', 'false');
+                        // 更新日期范围显示
+                        this.updateDateRangeDisplay();
                         if (this.canvas) {
                             this.resizeCanvas();
                             this.render();
