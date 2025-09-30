@@ -126,11 +126,10 @@ async function saveNewTask(button) {
 
     try {
         // 添加到数据库
-        const db = await openDB();
-        const taskId = await db.add('tasks', newTask);
+        await DBUtils.addTask(newTask);
         
         // 重新加载任务列表
-        const tasks = await db.getAll('tasks');
+        const tasks = await DBUtils.getAllTasks();
         renderTaskList(tasks);
         
         showToast('任务添加成功！', 'success');
