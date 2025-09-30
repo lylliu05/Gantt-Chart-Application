@@ -3,74 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="甘特图应用 - 用于项目管理和任务规划的可视化工具">
+    <meta name="theme-color" content="#2c3e50">
     <title>Canvas甘特图</title>
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="./import-styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" referrerpolicy="no-referrer">
 </head>
 <body>
-    <div class="pane-container">
-        <div class="header-pane">
+    <div class="pane-container" role="application" aria-label="甘特图应用">
+        <header class="header-pane">
             <h1>甘特图</h1>
-            <a href="task-list.html" class="view-task-list" title="查看任务列表">
-                <i class="fas fa-list"></i> 任务列表
+            <a href="task-list.html" class="view-task-list" title="查看任务列表" aria-label="查看任务列表">
+                <i class="fas fa-list" aria-hidden="true"></i> 任务列表
             </a>
-        </div>
+        </header>
         
-        <div class="controls-pane">
+        <nav class="controls-pane" aria-label="甘特图控制面板">
             <div class="action-buttons">
-                <button id="addTask" class="action-btn btn-primary" title="添加新任务"><i class="fas fa-plus-circle btn-icon"></i>添加</button>
-                <button id="importBtn" class="action-btn btn-secondary" title="导入JSON格式的任务数据"><i class="fas fa-file-import btn-icon"></i>导入</button>
-                <input type="file" id="importFile" accept=".json" style="display:none" 
+                <button id="addTask" class="action-btn btn-primary" title="添加新任务" aria-label="添加新任务">
+                    <i class="fas fa-plus-circle btn-icon" aria-hidden="true"></i>添加
+                </button>
+                <button id="importBtn" class="action-btn btn-secondary" title="导入JSON格式的任务数据" aria-label="导入任务数据">
+                    <i class="fas fa-file-import btn-icon" aria-hidden="true"></i>导入
+                </button>
+                <input type="file" id="importFile" accept=".json" class="hidden-file-input" 
                        title="选择JSON文件导入" aria-label="选择JSON文件导入">
-                <button id="exportBtn" class="action-btn btn-secondary" title="导出当前任务数据为JSON文件"><i class="fas fa-file-export btn-icon"></i>导出</button>                
+                <button id="exportBtn" class="action-btn btn-secondary" title="导出当前任务数据为JSON文件" aria-label="导出任务数据">
+                    <i class="fas fa-file-export btn-icon" aria-hidden="true"></i>导出
+                </button>
             
-                <button id="prevWeek" class="action-btn btn-secondary" aria-label="上一周" title="上一周"><i class="fas fa-chevron-left btn-icon"></i></button>
-                <button id="todayBtn" class="action-btn btn-secondary" aria-label="跳转到今天" title="跳转到今天"><i class="fas fa-calendar-day btn-icon"></i> 今天</button>
-                <span id="currentDateRange">2023年11月20日-26日</span>
-                <button id="nextWeek" class="action-btn btn-secondary" aria-label="下一周" title="下一周"><i class="fas fa-chevron-right btn-icon"></i></button>
+                <div class="date-navigation" role="group" aria-label="日期导航">
+                    <button id="prevWeek" class="action-btn btn-secondary" aria-label="上一周" title="上一周">
+                        <i class="fas fa-chevron-left btn-icon" aria-hidden="true"></i>
+                        <span class="sr-only">上一周</span>
+                    </button>
+                    <button id="todayBtn" class="action-btn btn-secondary" aria-label="跳转到今天" title="跳转到今天">
+                        <i class="fas fa-calendar-day btn-icon" aria-hidden="true"></i> 今天
+                    </button>
+                    <span id="currentDateRange" aria-live="polite" role="status" aria-atomic="true">2023年11月20日-26日</span>
+                    <button id="nextWeek" class="action-btn btn-secondary" aria-label="下一周" title="下一周">
+                        <i class="fas fa-chevron-right btn-icon" aria-hidden="true"></i>
+                        <span class="sr-only">下一周</span>
+                    </button>
+                </div>
            
-                <button id="weekView" class="action-btn btn-secondary active" title="切换到周视图"><i class="fas fa-calendar-week btn-icon"></i>周视图</button>
-                <button id="monthView" class="action-btn btn-secondary" title="切换到月视图"><i class="fas fa-calendar-alt btn-icon"></i>月视图</button>
+                <div class="view-controls" role="radiogroup" aria-label="视图控制">
+                    <button id="weekView" class="action-btn btn-secondary active" title="切换到周视图" aria-label="周视图" role="radio" aria-checked="true">
+                        <i class="fas fa-calendar-week btn-icon" aria-hidden="true"></i>周视图
+                    </button>
+                    <button id="monthView" class="action-btn btn-secondary" title="切换到月视图" aria-label="月视图" role="radio" aria-checked="false">
+                        <i class="fas fa-calendar-alt btn-icon" aria-hidden="true"></i>月视图
+                    </button>
+                </div>
             </div>
-        </div>
+        </nav>
         
-        <div class="gantt-pane">
-            <div class="canvas-container">
-                <canvas id="ganttCanvas"></canvas>
+        <main class="gantt-pane">
+            <div class="canvas-container" role="region" aria-label="甘特图画布区域">
+                <canvas id="ganttCanvas" aria-label="甘特图" role="img" tabindex="0" aria-roledescription="甘特图任务时间线" aria-describedby="ganttDescription"></canvas>
+                <div id="ganttDescription" class="sr-only">此甘特图显示了项目任务的时间安排。您可以点击任务来编辑它们。使用键盘导航可以浏览不同的任务。</div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <div id="taskDialog" class="task-dialog" aria-hidden="true">
+    <div id="taskDialog" class="task-dialog" aria-hidden="true" role="dialog" aria-labelledby="dialogTitle" aria-modal="true" aria-describedby="dialogDescription">
+        <div id="dialogDescription" class="sr-only">此对话框用于添加或编辑任务。请填写任务名称、开始日期和结束日期。</div>
         <form id="taskForm">
-            <h3>添加新任务</h3>
+            <h3 id="dialogTitle">添加新任务</h3>
             <div class="dialog-content">
                 <label for="taskName">任务名称</label>
                 <input type="text" id="taskName" required aria-describedby="taskNameHelp" 
                        placeholder="例如：项目计划会议" title="请输入任务名称">
-                
+                <div id="taskNameHelp" class="form-help-text">请输入任务的名称或描述</div>
             </div>
             <div class="dialog-content">
                 <label for="taskStartDate">开始日期</label>
                 <input type="date" id="taskStartDate" required aria-describedby="startDateHelp"
                        title="请选择任务开始日期">
-               
+                <div id="startDateHelp" class="form-help-text">请选择任务的开始日期</div>
             </div>
             <div class="dialog-content">
                 <label for="taskEndDate">结束日期</label>
                 <input type="date" id="taskEndDate" required aria-describedby="endDateHelp"
                        title="请选择任务结束日期">
-                
-                
+                <div id="endDateHelp" class="form-help-text">请选择任务的结束日期，必须晚于或等于开始日期</div>
             </div>
             <div class="dialog-buttons">
-                <button type="button" id="cancelDialog" class="dialog-btn cancel-btn" title="取消当前操作"><i class="fas fa-times"></i> 取消</button>
-                <button type="submit" class="dialog-btn submit-btn" title="提交任务信息"><i class="fas fa-check"></i> 添加</button>
+                <button type="button" id="cancelDialog" class="dialog-btn cancel-btn" title="取消当前操作" aria-label="取消">
+                    <i class="fas fa-times" aria-hidden="true"></i> 取消
+                </button>
+                <button type="submit" class="dialog-btn submit-btn" title="提交任务信息" aria-label="添加任务">
+                    <i class="fas fa-check" aria-hidden="true"></i> 添加
+                </button>
             </div>
         </form>
     </div>
     <div id="overlay" class="overlay" aria-hidden="true" tabindex="-1"></div>
+    
+
     <script src="import-helper.js"></script>
     <script src="task-styles.js"></script>
     <script src="script.js"></script>

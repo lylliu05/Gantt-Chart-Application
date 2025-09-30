@@ -62,7 +62,7 @@
                             <td class="task-dates">${task.endDate.toLocaleDateString('zh-CN')}</td>
                             <td class="task-progress">
                                 <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${task.progress || 0}%"></div>
+                                    <div class="progress-fill" data-progress="${task.progress || 0}"></div>
                                 </div>
                                 ${task.progress || 0}%
                             </td>
@@ -74,6 +74,13 @@
                         `;
                         
                         taskListBody.appendChild(row);
+                        
+                        // 设置进度条宽度
+                        const progressFill = row.querySelector('.progress-fill');
+                        if (progressFill) {
+                            const progress = task.progress || 0;
+                            progressFill.style.width = `${progress}%`;
+                        }
                         
                         // 为编辑按钮添加点击事件
                         const editBtn = row.querySelector('.edit-btn');
@@ -155,7 +162,7 @@
                                 <td class="task-dates">${task.endDate.toLocaleDateString('zh-CN')}</td>
                                 <td class="task-progress">
                                     <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${task.progress || 0}%"></div>
+                                        <div class="progress-fill" data-progress="${task.progress || 0}"></div>
                                     </div>
                                     ${task.progress || 0}%
                                 </td>
@@ -166,6 +173,13 @@
                                 </td>
                             `;
 
+                            // 设置进度条宽度
+                            const progressFill = row.querySelector('.progress-fill');
+                            if (progressFill) {
+                                const progress = task.progress || 0;
+                                progressFill.style.width = `${progress}%`;
+                            }
+                            
                             // 重新绑定编辑事件
                             const editBtn = row.querySelector('.edit-btn');
                             if (editBtn) {
@@ -235,9 +249,7 @@
             } catch (error) {
                 console.error('任务列表初始化失败:', error);
                 const errorMsg = document.createElement('div');
-                errorMsg.style.color = 'red';
-                errorMsg.style.padding = '20px';
-                errorMsg.style.textAlign = 'center';
+                errorMsg.className = 'error-message';
                 errorMsg.innerHTML = `
                     <h3>任务列表加载失败</h3>
                     <p>${error.message}</p>
