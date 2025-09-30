@@ -26,29 +26,49 @@
 
         <main class="recommended-tasks-container">
             <section class="recommendation-filters">
-                <h2>筛选条件</h2>
-                <div class="filter-group">
-                    <label for="timeRange">时间范围</label>
-                    <select id="timeRange" class="filter-select">
-                        <option value="today">今天</option>
-                        <option value="tomorrow">明天</option>
-                        <option value="week">本周</option>
-                        <option value="month">本月</option>
-                    </select>
+                <div class="filter-button-group">
+                    <button id="filterButton" class="filter-toggle-btn">
+                        <i class="fas fa-filter"></i> 筛选条件
+                    </button>
+                    <button id="refreshRecommendations" class="action-btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> 刷新推荐
+                    </button>
                 </div>
-                <div class="filter-group">
-                    <label for="priority">优先级</label>
-                    <select id="priority" class="filter-select">
-                        <option value="all">全部</option>
-                        <option value="high">高</option>
-                        <option value="medium">中</option>
-                        <option value="low">低</option>
-                    </select>
-                </div>
-                <button id="refreshRecommendations" class="action-btn btn-primary">
-                    <i class="fas fa-sync-alt"></i> 刷新推荐
-                </button>
             </section>
+
+            <!-- 筛选条件弹出框 -->
+            <div id="filterDialog" class="filter-dialog" aria-hidden="true">
+                <div class="filter-dialog-content">
+                    <h2>筛选条件</h2>
+                    <div class="filter-group">
+                        <label for="timeRange">时间范围</label>
+                        <select id="timeRange" class="filter-select">
+                            <option value="today">今天</option>
+                            <option value="tomorrow">明天</option>
+                            <option value="week">本周</option>
+                            <option value="month">本月</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="priority">优先级</label>
+                        <select id="priority" class="filter-select">
+                            <option value="all">全部</option>
+                            <option value="high">高</option>
+                            <option value="medium">中</option>
+                            <option value="low">低</option>
+                        </select>
+                    </div>
+                    <div class="filter-dialog-buttons">
+                        <button id="applyFilters" class="btn-primary">
+                            <i class="fas fa-check"></i> 应用筛选
+                        </button>
+                        <button id="closeFilterDialog" class="btn-secondary">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="filterOverlay" class="filter-overlay"></div>
 
             <section class="recommendations-list">
                 <h2>推荐任务</h2>

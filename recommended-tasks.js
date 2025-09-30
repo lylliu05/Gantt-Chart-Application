@@ -10,6 +10,11 @@ class TaskRecommender {
         this.timeRangeSelect = document.getElementById('timeRange');
         this.prioritySelect = document.getElementById('priority');
         this.refreshButton = document.getElementById('refreshRecommendations');
+        this.filterButton = document.getElementById('filterButton');
+        this.filterDialog = document.getElementById('filterDialog');
+        this.filterOverlay = document.getElementById('filterOverlay');
+        this.applyFiltersButton = document.getElementById('applyFilters');
+        this.closeFilterButton = document.getElementById('closeFilterDialog');
         
         // 获取容器元素
         this.tasksContainer = document.getElementById('recommendedTasksContainer');
@@ -18,13 +23,44 @@ class TaskRecommender {
         this.todayTasksCount = document.getElementById('todayTasksCount');
         this.upcomingTasksCount = document.getElementById('upcomingTasksCount');
         this.completedTasksCount = document.getElementById('completedTasksCount');
+
+        // 保存筛选条件的初始值
+        this.currentFilters = {
+            timeRange: this.timeRangeSelect.value,
+            priority: this.prioritySelect.value
+        };
     }
 
     initializeEventListeners() {
-        // 添加筛选器变化事件监听
-        this.timeRangeSelect.addEventListener('change', () => this.updateRecommendations());
-        this.prioritySelect.addEventListener('change', () => this.updateRecommendations());
+        // 筛选按钮点击事件
+        this.filterButton.addEventListener('click', () => this.showFilterDialog());
+        
+        // 应用筛选按钮点击事件
+        this.applyFiltersButton.addEventListener('click', () => this.applyFilters());
+        
+        // 关闭筛选框按钮点击事件
+        this.closeFilterButton.addEventListener('click', () => this.closeFilterDialog());
+        
+        // 点击遮罩层关闭筛选框
+        this.filterOverlay.addEventListener('click', () => this.closeFilterDialog());
+        
+        // ESC 键关闭筛选框
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.filterDialog.classList.contains('show')) {
+                this.closeFilterDialog();
+            }
+        });
+
+        // 刷新按钮点击事件
         this.refreshButton.addEventListener('click', () => this.loadTasks());
+
+        // 保存筛选条件的变化
+        this.timeRangeSelect.addEventListener('change', () => {
+            this.currentFilters.timeRange = this.timeRangeSelect.value;
+        });
+        this.prioritySelect.addEventListener('change', () => {
+            this.currentFilters.priority = this.prioritySelect.value;
+        });
     }
 
     async loadTasks() {
@@ -245,6 +281,46 @@ class TaskRecommender {
         setTimeout(() => {
             toast.style.display = 'none';
         }, 3000);
+    }
+
+    showFilterDialog() {
+        // 显示遮罩层和筛选框
+        this.filterDialog.classList.add('show');
+        this.filterOverlay.classList.add('show');
+        
+        // 恢复当前的筛选条件
+        this.timeRangeSelect.value = this.currentFilters.timeRange;
+        this.prioritySelect.value = this.currentFilters.priority;
+        
+        // 设置焦点到第一个选择框
+        this.timeRangeSelect.focus();
+    }
+
+    closeFilterDialog() {
+        // 隐藏遮罩层和筛选框
+        this.filterDialog.classList.remove('show');
+        this.filterOverlay.classList.remove('show');
+        
+        // 恢复之前保存的筛选条件
+        this.timeRangeSelect.value = this.currentFilters.timeRange;
+        this.prioritySelect.value = this.currentFilters.priority;
+    }
+
+    applyFilters() {
+        // 保存新的筛选条件
+        this.currentFilters = {
+            timeRange: this.timeRangeSelect.value,
+            priority: this.prioritySelect.value
+        };
+        
+        // 更新推荐任务列表
+        this.updateRecommendations();
+        
+        // 关闭筛选框
+        this.closeFilterDialog();
+        
+        // 显示提示信息
+        this.showToast('筛选条件已更新');
     }
 }
 
