@@ -3,34 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>任务列表</title>
+    <title>任务列表 - 甘特图项目管理</title>
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./task-list.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="task-list-container">
         <div class="task-list-header">
-            <h1 class="task-list-title">任务列表</h1>
-            <a href="index.html" class="back-to-gantt">
+            <h1 class="task-list-title">
+                <i class="fas fa-tasks"></i>
+                任务列表
+            </h1>
+            <a href="index.html" class="back-to-gantt" title="返回甘特图视图">
                 <i class="fas fa-arrow-left"></i> 返回甘特图
             </a>
         </div>
         
-        <table class="task-table">
-            <thead>
-                <tr>
-                    <th>任务名称</th>
-                    <th>开始日期</th>
-                    <th>结束日期</th>
-                    <th>进度</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="taskListBody">
-                <!-- 任务列表将通过JavaScript动态生成 -->
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="task-table" role="grid" aria-label="任务列表">
+                <thead>
+                    <tr>
+                        <th scope="col" role="columnheader">任务名称</th>
+                        <th scope="col" role="columnheader">开始日期</th>
+                        <th scope="col" role="columnheader">结束日期</th>
+                        <th scope="col" role="columnheader">进度</th>
+                        <th scope="col" role="columnheader">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="taskListBody">
+                    <!-- 任务列表将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 添加任务按钮 -->
+        <div class="task-actions">
+            <button id="addTaskBtn" class="add-task-btn" title="添加新任务">
+                <i class="fas fa-plus"></i> 添加任务
+            </button>
+        </div>
     </div>
+
+    <!-- 引入数据库和工具函数 -->
+    <script src="./db.js"></script>
+    <script src="./date-utils.js"></script>
+    <!-- 引入任务列表逻辑 -->
+    <script src="./task-list.js"></script>
+
+    <!-- 动画样式 -->
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Toast 样式 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 4px;
+            color: white;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast-success {
+            background-color: #27ae60;
+        }
+
+        .toast-error {
+            background-color: #e74c3c;
+        }
+
+        .toast-info {
+            background-color: #3498db;
+        }
+
+        /* 编辑状态样式 */
+        .editing {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .editing td {
+            padding: 8px !important;
+        }
+
+        .edit-task-name,
+        .edit-start-date,
+        .edit-end-date,
+        .edit-progress {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-task-name:focus,
+        .edit-start-date:focus,
+        .edit-end-date:focus,
+        .edit-progress:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+    </style>
+</body>
+</html>
     
     <script src="script.js"></script>
     <script>
